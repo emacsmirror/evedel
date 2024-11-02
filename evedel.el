@@ -1,6 +1,6 @@
 ;;; evedel.el --- Instructed LLM programmer/assistant for Emacs -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2024  daedsidog
+;; Copyright (C) 2024 daedsidog
 
 ;; Author: daedsidog <contact@daedsidog.com>
 ;; Version: 0.4.12
@@ -79,7 +79,7 @@
 (defcustom e:subinstruction-tint-coefficient 0.4
   "Coeffecient multiplied by by tint intensities.
 
-Only applicable to the subinstructions. Makes it possible to have more a
+Only applicable to the subinstructions.  Makes it possible to have more a
 more finely-tuned control over how tinting looks.
 
 Does not affect the label colors, just the backgrounds."
@@ -89,7 +89,7 @@ Does not affect the label colors, just the backgrounds."
   "Determines behavior of directives without a tag search query.
 
 If set to t, directives without a specific tag search query will use all
-available references.  Alternatively, if this is set to nil, directives without 
+available references.  Alternatively, if this is set to nil, directives without
 a search query will not use any references."
   :type 'boolean)
 
@@ -130,6 +130,9 @@ Answers the question \"who is the model?\""
   "If t, `evedel--restore-file-instructions' becomes inert.
 This is sometimes necessary to prevent various hooks from interfering with the
 instruction restoration process.")
+(defvar e::id-counter 0)
+(defvar e::id-usage-map (make-hash-table))
+(defvar e::retired-ids ())
 
 (defmacro e::foreach-instruction (binding &rest body)
   "Iterate over `evedel--instructions' with BINDING as the binding.
@@ -147,7 +150,7 @@ The purpose of this macro is to be able to iterate over instructions
 while also making sure that the iterated instructions are valid, i.e.
 have an associated buffer to the overlay.
 
-This macro is the preferred way to iterate over instructions, as it 
+This macro is the preferred way to iterate over instructions, as it
 handles all the internal bookkeeping and cleanup."
   (declare (indent 1))
   ;; "bof" stands for "buffer or file".
@@ -2629,10 +2632,6 @@ This is mostly a brittle hack meant to make Ediff be used noninteractively."
                           (apply-all-diffs)
                           (ediff-quit t)))))))))
         (set-window-configuration orig-window-config)))))
-
-(defvar e::id-counter 0)
-(defvar e::id-usage-map (make-hash-table))
-(defvar e::retired-ids ())
 
 (defun e::create-id ()
   (let ((id
