@@ -179,10 +179,13 @@ The =evedel-process-directives= command processes the directives.
 | =evedel-subinstruction-tint-intensity=    | Coefficient for adjusting subinstruction tints   |
 |-------------------------------------------+--------------------------------------------------|
 
-** Setup
+** Installation
 
 Before proceeding, make sure you have [[https://github.com/karthink/gptel][gptel]] configured (see [[#requirements][requirements]]). *This package will not work without it.*
-Clone the Evedel repository:
+
+*** Manual
+
+Clone the repository:
    
 #+begin_src sh
 git clone https://github.com/daedsidog/evedel.git
