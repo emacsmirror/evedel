@@ -1,33 +1,36 @@
-;;; evedel.el --- Instructed LLM programmer/assistant for Emacs -*- lexical-binding: t; -*-
+;;; evedel.el --- Instructed LLM programmer/assistant -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2024 daedsidog
 
 ;; Author: daedsidog <contact@daedsidog.com>
-;; Version: 0.4.12
+;; Version: 0.4.16
 ;; Keywords: convenience, tools
 ;; Package-Requires: ((emacs "29.1") (gptel "0.9.0"))
 ;; URL: https://github.com/daedsidog/evedel
 
 ;; SPDX-License-Identifier: GPL-3.0-or-later
 
-;; This program is free software; you can redistribute it and/or modify it under the terms of the
-;; GNU General Public License as published by the Free Software Foundation, either version 3 of the
-;; License, or (at your option) any later version.
+;; This program is free software; you can redistribute it and/or modify it under
+;; the terms of the GNU General Public License as published by the Free Software
+;; Foundation, either version 3 of the License, or (at your option) any later
+;; version.
 ;;
-;; This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
-;; even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; This program is distributed in the hope that it will be useful, but WITHOUT
+;; ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+;; FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+;; details.
 ;;
-;; You should have received a copy of the GNU General Public License along with this program.  If
-;; not, see <https://www.gnu.org/licenses/>.
+;; You should have received a copy of the GNU General Public License along with
+;; this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;; This file is NOT part of GNU Emacs.
 
 ;;; Commentary:
 
-;; Evedel is a gptel extension aimed at managing and processing in-code instructions.  It provides
-;; functionality to define, manipulate, and process directives and references within a buffer.  Key
-;; features include creating, deleting, and updating instructional overlays, as well as processing
+;; Evedel is a gptel extension aimed at managing and processing in-code
+;; instructions.  It provides functionality to define, manipulate, and process
+;; directives and references within a buffer.  Key features include creating,
+;; deleting, and updating instructional overlays, as well as processing
 ;; responses from LLMs for directives.
 
 ;;; Code:
@@ -197,7 +200,7 @@ handles all the internal bookkeeping and cleanup."
 Interactively, or when MESSAGE is non-nil, show it in echo area.  With prefix
 argument, or when HERE is non-nil, insert it at point."
   (interactive (list (or current-prefix-arg 'interactive)))
-  (let ((version "v0.4.12"))
+  (let ((version "v0.4.16"))
     (cond
      ((or message (called-interactively-p 'any)) (message "Evedel %s" version))
      (here (insert (format "Evedel %s" version)))
@@ -587,10 +590,10 @@ Throw a user error if no instructions to delete were found."
 (defun e-convert-instructions ()
   "Convert instructions between reference and directive type.
 
-If a region is selected, convert all instructions within the region. If no
+If a region is selected, convert all instructions within the region.  If no
 region is selected, convert only the highest priority instruction at point.
 
-Bodyless directives cannot be converted to references. Attempting to do so
+Bodyless directives cannot be converted to references.  Attempting to do so
 will throw a user error."
   (interactive)
   (let* ((instructions (if (use-region-p)
@@ -632,7 +635,7 @@ will throw a user error."
                                    (if (= converted-references-to-directives 1) "" "s")))))))
         (message (concat
                   msg (if conversion-msgs
-                          (concat ": " (mapconcat 'identity conversion-msgs " and "))
+                          (concat ": " (mapconcat #'identity conversion-msgs " and "))
                         ""))
                  num-instructions
                  (if (> num-instructions 1) "s" ""))
@@ -692,7 +695,8 @@ This command is useful to see what is actually being sent to the model."
           (princ "\n\n")
           (princ request-string)
           (with-current-buffer bufname
-            (markdown-mode)
+            (when (fboundp 'markdown-mode)
+              (markdown-mode))
             (read-only-mode 1)
             (visual-line-mode 1)
             (display-line-numbers-mode 1)
@@ -1094,8 +1098,8 @@ Signals an error when the query is malformed."
 (defun e--cycle-list-around (element list)
   "Cycle list LIST around ELEMENT.
 
-If ELEMENT is found in LIST, returns a list with ELEMENT as the head and the rest
-of the list rotated around it.  Otherwise, returns the LIST."
+If ELEMENT is found in LIST, returns a list with ELEMENT as the head and the
+rest of the list rotated around it.  Otherwise, returns the LIST."
   (if-let ((element-tail (member element list)))
       (append element-tail 
               (cl-loop for elt in list
@@ -1183,7 +1187,7 @@ Returns the number of tags removed."
 (defun e--reference-tags (reference &optional include-parent-tags)
   "Return the list of tags for the given REFERENCE.
 
-If INCLUDE-PARENT-TAG is non-nil, gets te parent's tags as well."
+If INCLUDE-PARENT-TAGS is non-nil, gets te parent's tags as well."
   (if (not include-parent-tags)
       (overlay-get reference 'e-reference-tags)
     (append (overlay-get reference 'e-reference-tags)
@@ -1220,7 +1224,7 @@ A directive is empty if it does not have a body or secondary directives."
   "Create or scale an instruction of the given TYPE within the selected region.
 
 If a region is selected but partially covers an existing instruction, then the
-function will resize it. See either `evedel-create-reference' or
+function will resize it.  See either `evedel-create-reference' or
 `evedel-create-directive' for details on how the resizing works."
   (if (use-region-p)
       (let ((intersecting-instructions
@@ -1586,7 +1590,7 @@ words as a last resort if a word is too long to fit on a line by itself."
       (string-trim (buffer-string)))))
 
 (defun e--instructions-congruent-p (a b)
-  "Returns t only if instruction overlays A and B are congruent."
+  "Return t only if instruction overlays A and B are congruent."
   (and (eq (overlay-buffer a) (overlay-buffer b))
        (= (overlay-start a) (overlay-start b))
        (= (overlay-end a) (overlay-end b))))
@@ -1821,7 +1825,7 @@ non-nil."
                (let ((instruction-is-at-eol (with-current-buffer (overlay-buffer instruction)
                                               (save-excursion
                                                 (goto-char (overlay-end instruction))
-                                                (= (point) (pos-eol))))))
+                                                (eolp)))))
                  ;; Propertize specific parts of the before-string of the label, to give
                  ;; the illusion that its a "sticker" in the buffer.
                  (cl-labels
